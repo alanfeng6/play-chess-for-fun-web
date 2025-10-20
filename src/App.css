@@ -1,0 +1,12 @@
+.margin-left {
+    margin-left: 1%;
+}
+
+html body {
+    background-color: grey;
+    color: white;
+}
+
+html a {
+    color: white;
+}
