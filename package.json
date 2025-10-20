@@ -1,7 +1,7 @@
 {
   "name": "play-chess-for-fun",
   "private": true,
-  "homepage": "https://alanfeng6.github.io/",
+  "homepage": "https://alanfeng6.github.io/play-chess-for-fun-web/",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d ."
   },
   "dependencies": {
     "react": "^19.1.1",
