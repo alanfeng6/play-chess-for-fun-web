@@ -9,13 +9,13 @@ const Square = ({ num, image }: Props) => {
   if (num % 2 === 0) {
     return (
       <div className="square black-square">
-        <img src={image} className="img"></img>
+        {image && <div style={{backgroundImage: `url(${image})`}} className="piece"></div>}
       </div>
     );
   } else {
     return (
       <div className="square white-square">
-        <img src={image} className="img"></img>
+        {image && <div style={{backgroundImage: `url(${image})`}} className="piece"></div>}
       </div>
     );
   }

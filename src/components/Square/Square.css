@@ -5,6 +5,22 @@
     height: 100px;
 }
 
+.square .piece {
+    width: 100px;
+    height: 100px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100px;
+}
+
+.square .piece:hover {
+    cursor: grab;
+}
+
+.square .piece:active {
+    cursor: grabbing;
+}
+
 .black-square {
     background-color: saddlebrown;
 }
