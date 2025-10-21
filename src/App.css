@@ -1,12 +1,6 @@
-.margin-left {
-    margin-left: 1%;
-}
-
-html body {
-    background-color: grey;
-    color: white;
-}
-
-html a {
-    color: white;
+#app {
+    display: grid;
+    place-content: center;
+    height: 94.05vh;
+    background-color: gray;
 }

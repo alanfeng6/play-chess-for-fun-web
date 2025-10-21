@@ -1,8 +1,18 @@
 const Navbar = () => {
   return (
-    <nav className="navbar bg-body-tertiary">
+    <nav className="navbar bg-primary">
       <div className="container-fluid">
-        <span className="navbar-brand mb-0 h1">Play Chess For Fun</span>
+        <a className="navbar-brand" href="#" style={{color: "white"}}>
+          <img
+            src="./logo.jpg"
+            alt="Logo"
+            width="50"
+            height="50"
+            style={{marginRight: "10px"}}
+            className="d-inline-block"
+          ></img>
+          Play Chess For Fun
+        </a>
       </div>
     </nav>
   );
