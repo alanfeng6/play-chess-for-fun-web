@@ -2,119 +2,21 @@ import { useRef, useState } from "react";
 import Square from "../Square/Square";
 import "./Board.css";
 import Rules from "../../Rules/Rules";
-
-const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
-const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
-
-export interface Piece {
-  image: string;
-  x: number;
-  y: number;
-  type: PieceType;
-  color: Color;
-}
-
-export enum PieceType {
-  pawn,
-  rook,
-  knight,
-  bishop,
-  queen,
-  king,
-}
-
-export enum Color {
-  black,
-  white,
-}
-
-const initialBoardState: Piece[] = [];
-
-for (let i = 0; i < 8; i++) {
-  initialBoardState.push({
-    image: "./black_pawn.png",
-    x: i,
-    y: 6,
-    type: PieceType.pawn,
-    color: Color.black,
-  });
-}
-for (let i = 0; i < 8; i++) {
-  initialBoardState.push({
-    image: "./white_pawn.png",
-    x: i,
-    y: 1,
-    type: PieceType.pawn,
-    color: Color.white,
-  });
-}
-for (let p = 0; p < 2; p++) {
-  const color = p === 0 ? Color.black : Color.white;
-  const type = color === Color.black ? "black" : "white";
-  const y = color === Color.black ? 7 : 0;
-
-  initialBoardState.push({
-    image: `./${type}_rook.png`,
-    x: 0,
-    y,
-    type: PieceType.rook,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_rook.png`,
-    x: 7,
-    y,
-    type: PieceType.rook,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_knight.png`,
-    x: 1,
-    y,
-    type: PieceType.knight,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_knight.png`,
-    x: 6,
-    y,
-    type: PieceType.knight,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_bishop.png`,
-    x: 2,
-    y,
-    type: PieceType.bishop,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_bishop.png`,
-    x: 5,
-    y,
-    type: PieceType.bishop,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_queen.png`,
-    x: 3,
-    y,
-    type: PieceType.queen,
-    color: color,
-  });
-  initialBoardState.push({
-    image: `./${type}_king.png`,
-    x: 4,
-    y,
-    type: PieceType.king,
-    color: color,
-  });
-}
+import {
+  VERTICAL_AXIS,
+  HORIZONTAL_AXIS,
+  Piece,
+  PieceType,
+  Color,
+  initialBoardState,
+  Position,
+  GRID_SIZE,
+  samePosition,
+} from "../../Constants";
 
 const Board = () => {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
-  const [prevX, setPrevX] = useState(0);
-  const [prevY, setPrevY] = useState(0);
+  const [prevPosition, setPrevPosition] = useState<Position>({ x: -1, y: -1 });
   const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
   const boardRef = useRef<HTMLDivElement>(null);
   const rules = new Rules();
@@ -123,10 +25,16 @@ const Board = () => {
     const element = e.target as HTMLElement;
     const board = boardRef.current;
     if (element.classList.contains("piece") && board) {
-      setPrevX(Math.floor((e.clientX - board.offsetLeft) / 100));
-      setPrevY(Math.abs(Math.ceil((e.clientY - board.offsetTop - 800) / 100)));
-      const x = e.clientX - 50;
-      const y = e.clientY - 50;
+      const prevX = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
+      const prevY = Math.abs(
+        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+      );
+      setPrevPosition({
+        x: prevX,
+        y: prevY,
+      });
+      const x = e.clientX - GRID_SIZE / 2;
+      const y = e.clientY - GRID_SIZE / 2;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
@@ -165,30 +73,71 @@ const Board = () => {
   function dropPiece(e: React.MouseEvent) {
     const board = boardRef.current;
     if (activePiece && board) {
-      const x = Math.floor((e.clientX - board.offsetLeft) / 100);
-      const y = Math.abs(Math.ceil((e.clientY - board.offsetTop - 800) / 100));
+      const x = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
+      const y = Math.abs(
+        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+      );
 
-      const currentPiece = pieces.find((p) => p.x === prevX && p.y === prevY);
-      const capturedPiece = pieces.find((p) => p.x === x && p.y === y);
+      const currentPiece = pieces.find(
+        (p) =>
+          samePosition(p.position, prevPosition)
+      );
 
       if (currentPiece) {
         const legalMove = rules.isLegalMove(
-          prevX,
-          prevY,
-          x,
-          y,
+          prevPosition,
+          {x,y},
           currentPiece.type,
           currentPiece.color,
           pieces
         );
-        // set piece position
-        if (legalMove) {
+        const isEnPassant = rules.isEnPassant(
+          prevPosition,
+          {x,
+          y,},
+          currentPiece.type,
+          currentPiece.color,
+          pieces
+        );
+        const pawnDirection = currentPiece.color === Color.white ? 1 : -1;
+        if (isEnPassant) {
           const updatedPieces = pieces.reduce((results, piece) => {
-            if (piece.x === prevX && piece.y === prevY) {
-              piece.x = x;
-              piece.y = y;
+            if (
+              samePosition(piece.position, prevPosition)
+            ) {
+              piece.enPassant = false;
+              piece.position.x = x;
+              piece.position.y = y;
               results.push(piece);
-            } else if (!(piece.x === x && piece.y === y)) {
+            } else if (
+              !samePosition(piece.position, {x, y: y - pawnDirection})
+            ) {
+              if (piece.type === PieceType.pawn) {
+                piece.enPassant = false;
+              }
+              results.push(piece);
+            }
+            return results;
+          }, [] as Piece[]);
+          setPieces(updatedPieces);
+        } else if (legalMove) {
+          // set piece position
+          const updatedPieces = pieces.reduce((results, piece) => {
+            if (
+              samePosition(piece.position, prevPosition)
+            ) {
+              // check if piece is en passantable
+              piece.enPassant = (
+                Math.abs(prevPosition.y - y) === 2 &&
+                piece.type === PieceType.pawn
+              );
+              piece.position.x = x;
+              piece.position.y = y;
+              results.push(piece);
+            } else if (!samePosition(piece.position, {x, y})) {
+              if (piece.type === PieceType.pawn) {
+                piece.enPassant = false;
+              }
               results.push(piece);
             }
             return results;
@@ -205,15 +154,13 @@ const Board = () => {
     }
   }
   let board = [];
-  for (let i = verticalAxis.length - 1; i >= 0; i--) {
-    for (let j = 0; j < horizontalAxis.length; j++) {
+  for (let i = VERTICAL_AXIS.length - 1; i >= 0; i--) {
+    for (let j = 0; j < HORIZONTAL_AXIS.length; j++) {
       const num = i + j;
-      let image = undefined;
-      pieces.forEach((p) => {
-        if (p.x === j && p.y === i) {
-          image = p.image;
-        }
-      });
+      const piece = pieces.find(
+        (p) => samePosition(p.position, {x: j, y: i})
+      );
+      let image = piece ? piece.image : undefined;
       board.push(<Square key={`${j},${i}`} num={num} image={image} />);
     }
   }

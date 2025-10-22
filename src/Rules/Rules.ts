@@ -1,8 +1,8 @@
-import { PieceType, Color, type Piece } from "../components/Board/Board";
+import { PieceType, Color, Piece, Position } from "../Constants";
 
 export default class Rules {
   isOccupied(x: number, y: number, boardState: Piece[]): boolean {
-    const piece = boardState.find((p) => p.x === x && p.y === y);
+    const piece = boardState.find((p) => p.position.x === x && p.position.y === y);
     if (piece) {
       return true;
     }
@@ -16,7 +16,7 @@ export default class Rules {
     color: Color
   ): boolean {
     const piece = boardState.find(
-      (p) => p.x === x && p.y === y && p.color !== color
+      (p) => p.position.x === x && p.position.y === y && p.color !== color
     );
     if (piece) {
       return true;
@@ -24,11 +24,30 @@ export default class Rules {
     return false;
   }
 
+  isEnPassant(
+    prevPosition: Position,
+    position: Position,
+    type: PieceType,
+    color: Color,
+    boardState: Piece[]
+  ) {
+    const pawnDirection = color === Color.white ? 1 : -1;
+    if (type === PieceType.pawn) {
+      if ((prevPosition.x - position.x === 1 || position.x - prevPosition.x === 1) && position.y - prevPosition.y === pawnDirection) {
+        const piece = boardState.find(
+          (p) => p.position.x === position.x && p.position.y === position.y - pawnDirection && p.enPassant
+        );
+        if (piece) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   isLegalMove(
-    prevX: number,
-    prevY: number,
-    x: number,
-    y: number,
+    prevPosition: Position,
+    position: Position,
     type: PieceType,
     color: Color,
     boardState: Piece[]
@@ -39,30 +58,30 @@ export default class Rules {
 
       // regular moves
       if (
-        prevX === x &&
-        prevY === startingRow &&
-        y - prevY === 2 * pawnDirection
+        prevPosition.x === position.x &&
+        prevPosition.y === startingRow &&
+        position.y - prevPosition.y === 2 * pawnDirection
       ) {
         if (
-          !this.isOccupied(x, y, boardState) &&
-          !this.isOccupied(x, y - pawnDirection, boardState)
+          !this.isOccupied(position.x, position.y, boardState) &&
+          !this.isOccupied(position.x, position.y - pawnDirection, boardState)
         ) {
           return true;
         }
-      } else if (prevX === x && y - prevY === pawnDirection) {
-        if (!this.isOccupied(x, y, boardState)) {
+      } else if (prevPosition.x === position.x && position.y - prevPosition.y === pawnDirection) {
+        if (!this.isOccupied(position.x, position.y, boardState)) {
           return true;
         }
       }
       // captures
-      else if (prevX - x === 1 && y - prevY === pawnDirection) {
+      else if (prevPosition.x - position.x === 1 && position.y - prevPosition.y === pawnDirection) {
         // upper or bottom left
-        if (this.isOccupiedByOpponent(x, y, boardState, color)) {
+        if (this.isOccupiedByOpponent(position.x, position.y, boardState, color)) {
           return true;
         }
-      } else if (x - prevX === 1 && y - prevY === pawnDirection) {
+      } else if (position.x - prevPosition.x === 1 && position.y - prevPosition.y === pawnDirection) {
         // upper or bottom right
-        if (this.isOccupiedByOpponent(x, y, boardState, color)) {
+        if (this.isOccupiedByOpponent(position.x, position.y, boardState, color)) {
           return true;
         }
       }
