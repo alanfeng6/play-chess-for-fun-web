@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
-import Square from "../Square/Square";
+import Square from "../square/Square";
 import "./Board.css";
-import Rules from "../../Movement/Movement";
 import {
   VERTICAL_AXIS,
   HORIZONTAL_AXIS,
@@ -13,13 +12,14 @@ import {
   GRID_SIZE,
   samePosition,
 } from "../../Constants";
+import Movement from "../../Movement/Movement";
 
 const Board = () => {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const [prevPosition, setPrevPosition] = useState<Position>({ x: -1, y: -1 });
   const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
   const boardRef = useRef<HTMLDivElement>(null);
-  const rules = new Rules();
+  const movement = new Movement();
 
   function grabPiece(e: React.MouseEvent) {
     const element = e.target as HTMLElement;
@@ -84,14 +84,14 @@ const Board = () => {
       );
 
       if (currentPiece) {
-        const legalMove = rules.isLegalMove(
+        const legalMove = movement.isLegalMove(
           prevPosition,
           {x,y},
           currentPiece.type,
           currentPiece.color,
           pieces
         );
-        const isEnPassant = rules.isEnPassant(
+        const isEnPassant = movement.isEnPassant(
           prevPosition,
           {x,
           y,},
