@@ -70,6 +70,7 @@ export default class Rules {
     boardState: Piece[]
   ) {
     if (type === PieceType.pawn) {
+      // pawn
       const startingRow = color === Color.white ? 1 : 6;
       const pawnDirection = color === Color.white ? 1 : -1;
 
@@ -115,6 +116,7 @@ export default class Rules {
         }
       }
     } else if (type === PieceType.knight) {
+      // knight
       for (let i = -1; i < 2; i += 2) {
         for (let j = -1; j < 2; j += 2) {
           // top and bottom
@@ -135,6 +137,74 @@ export default class Rules {
               ) {
                 return true;
               }
+            }
+          }
+        }
+      }
+    } else if (type === PieceType.bishop) {
+      // bishop
+      for (let i = 1; i < 8; i++) {
+        // up right
+        if (position.x > prevPosition.x && position.y > prevPosition.y) {
+          let passedSquare: Position = {
+            x: prevPosition.x + i,
+            y: prevPosition.y + i,
+          };
+          if (samePosition(passedSquare, position)) {
+            if (this.isEmptyOrOccupiedByOpponent(passedSquare, boardState, color)) {
+              return true;
+            }
+          } else {
+            if (this.isOccupied(passedSquare, boardState)) {
+              break;
+            }
+          }
+        }
+        // down right
+        if (position.x > prevPosition.x && position.y < prevPosition.y) {
+          let passedSquare: Position = {
+            x: prevPosition.x + i,
+            y: prevPosition.y - i,
+          };
+          if (samePosition(passedSquare, position)) {
+            if (this.isEmptyOrOccupiedByOpponent(passedSquare, boardState, color)) {
+              return true;
+            }
+          } else {
+            if (this.isOccupied(passedSquare, boardState)) {
+              break;
+            }
+          }
+        }
+        // down left
+        if (position.x < prevPosition.x && position.y < prevPosition.y) {
+          let passedSquare: Position = {
+            x: prevPosition.x - i,
+            y: prevPosition.y - i,
+          };
+          if (samePosition(passedSquare, position)) {
+            if (this.isEmptyOrOccupiedByOpponent(passedSquare, boardState, color)) {
+              return true;
+            }
+          } else {
+            if (this.isOccupied(passedSquare, boardState)) {
+              break;
+            }
+          }
+        }
+        // up left
+        if (position.x < prevPosition.x && position.y > prevPosition.y) {
+          let passedSquare: Position = {
+            x: prevPosition.x - i,
+            y: prevPosition.y + i,
+          };
+          if (samePosition(passedSquare, position)) {
+            if (this.isEmptyOrOccupiedByOpponent(passedSquare, boardState, color)) {
+              return true;
+            }
+          } else {
+            if (this.isOccupied(passedSquare, boardState)) {
+              break;
             }
           }
         }
