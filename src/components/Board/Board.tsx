@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Square from "../Square/Square";
 import "./Board.css";
-import Rules from "../../Rules/Rules";
+import Rules from "../../Movement/Movement";
 import {
   VERTICAL_AXIS,
   HORIZONTAL_AXIS,
