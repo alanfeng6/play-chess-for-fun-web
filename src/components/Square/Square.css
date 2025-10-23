@@ -33,3 +33,18 @@
     width: 100px;
     height: 100px;
 }
+
+.highlighted-square:not(.piece-square)::before {
+    content: " ";
+    width: 90px;
+    height: 90px;
+    background-color: green;
+}
+
+.highlighted-square.piece-square::before {
+    position: absolute;
+    content: " ";
+    width: 100px;
+    height: 100px;
+    border: 10px solid red;
+}

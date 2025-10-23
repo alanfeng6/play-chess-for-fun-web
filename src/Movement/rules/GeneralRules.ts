@@ -1,10 +1,11 @@
-import { Color, Piece, Position, samePosition } from "../../Constants";
+import { Piece, Position } from "../../models";
+import { Color } from "../../Types";
 
 export const isOccupied = (
   position: Position,
   boardState: Piece[]
 ): boolean => {
-  const piece = boardState.find((p) => samePosition(p.position, position));
+  const piece = boardState.find((p) => p.samePosition(position));
   if (piece) {
     return true;
   }
@@ -17,7 +18,7 @@ export const isOccupiedByOpponent = (
   color: Color
 ): boolean => {
   const piece = boardState.find(
-    (p) => samePosition(p.position, position) && p.color !== color
+    (p) => p.samePosition(position) && p.color !== color
   );
   if (piece) {
     return true;

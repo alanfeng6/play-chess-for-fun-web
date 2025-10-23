@@ -1,326 +1,44 @@
+import { Pawn } from "./models/Pawn";
+import { Piece } from "./models/Piece";
+import { Position } from "./models/Position";
+import { Color, PieceType } from "./Types";
+
 export const VERTICAL_AXIS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 export const HORIZONTAL_AXIS = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export const GRID_SIZE = 100;
 
-export function samePosition(p1: Position, p2: Position) {
-    return p1.x === p2.x && p1.y === p2.y;
-}
-
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export enum PieceType {
-  pawn,
-  rook,
-  knight,
-  bishop,
-  queen,
-  king,
-}
-
-export enum Color {
-  black,
-  white,
-}
-
-export interface Piece {
-  image: string;
-  position: Position;
-  type: PieceType;
-  color: Color;
-  enPassant?: boolean;
-}
-
 export const initialBoardState: Piece[] = [
-  {
-    image: "./black_rook.png",
-    position: {
-      x: 0,
-      y: 7,
-    },
-    type: PieceType.rook,
-    color: Color.black,
-  },
-  {
-    image: "./black_knight.png",
-    position: {
-      x: 1,
-      y: 7,
-    },
-    type: PieceType.knight,
-    color: Color.black,
-  },
-  {
-    image: "./black_bishop.png",
-    position: {
-      x: 2,
-      y: 7,
-    },
-    type: PieceType.bishop,
-    color: Color.black,
-  },
-  {
-    image: "./black_queen.png",
-    position: {
-      x: 3,
-      y: 7,
-    },
-    type: PieceType.queen,
-    color: Color.black,
-  },
-  {
-    image: "./black_king.png",
-    position: {
-      x: 4,
-      y: 7,
-    },
-    type: PieceType.king,
-    color: Color.black,
-  },
-  {
-    image: "./black_bishop.png",
-    position: {
-      x: 5,
-      y: 7,
-    },
-    type: PieceType.bishop,
-    color: Color.black,
-  },
-  {
-    image: "./black_knight.png",
-    position: {
-      x: 6,
-      y: 7,
-    },
-    type: PieceType.knight,
-    color: Color.black,
-  },
-  {
-    image: "./black_rook.png",
-    position: {
-      x: 7,
-      y: 7,
-    },
-    type: PieceType.rook,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 0,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 1,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 2,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 3,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 4,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 5,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 6,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./black_pawn.png",
-    position: {
-      x: 7,
-      y: 6,
-    },
-    type: PieceType.pawn,
-    color: Color.black,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 0,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 1,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 2,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 3,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 4,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 5,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 6,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_pawn.png",
-    position: {
-      x: 7,
-      y: 1,
-    },
-    type: PieceType.pawn,
-    color: Color.white,
-  },
-  {
-    image: "./white_rook.png",
-    position: {
-      x: 0,
-      y: 0,
-    },
-    type: PieceType.rook,
-    color: Color.white,
-  },
-  {
-    image: "./white_knight.png",
-    position: {
-      x: 1,
-      y: 0,
-    },
-    type: PieceType.knight,
-    color: Color.white,
-  },
-  {
-    image: "./white_bishop.png",
-    position: {
-      x: 2,
-      y: 0,
-    },
-    type: PieceType.bishop,
-    color: Color.white,
-  },
-  {
-    image: "./white_queen.png",
-    position: {
-      x: 3,
-      y: 0,
-    },
-    type: PieceType.queen,
-    color: Color.white,
-  },
-  {
-    image: "./white_king.png",
-    position: {
-      x: 4,
-      y: 0,
-    },
-    type: PieceType.king,
-    color: Color.white,
-  },
-  {
-    image: "./white_bishop.png",
-    position: {
-      x: 5,
-      y: 0,
-    },
-    type: PieceType.bishop,
-    color: Color.white,
-  },
-  {
-    image: "./white_knight.png",
-    position: {
-      x: 6,
-      y: 0,
-    },
-    type: PieceType.knight,
-    color: Color.white,
-  },
-  {
-    image: "./white_rook.png",
-    position: {
-      x: 7,
-      y: 0,
-    },
-    type: PieceType.rook,
-    color: Color.white,
-  },
+  new Piece(new Position(0, 7), PieceType.rook, Color.black),
+  new Piece(new Position(1, 7), PieceType.knight, Color.black),
+  new Piece(new Position(2, 7), PieceType.bishop, Color.black),
+  new Piece(new Position(3, 7), PieceType.queen, Color.black),
+  new Piece(new Position(4, 7), PieceType.king, Color.black),
+  new Piece(new Position(5, 7), PieceType.bishop, Color.black),
+  new Piece(new Position(6, 7), PieceType.knight, Color.black),
+  new Piece(new Position(7, 7), PieceType.rook, Color.black),
+  new Pawn(new Position(0, 6), Color.black),
+  new Pawn(new Position(1, 6), Color.black),
+  new Pawn(new Position(2, 6), Color.black),
+  new Pawn(new Position(3, 6), Color.black),
+  new Pawn(new Position(4, 6), Color.black),
+  new Pawn(new Position(5, 6), Color.black),
+  new Pawn(new Position(6, 6), Color.black),
+  new Pawn(new Position(7, 6), Color.black),
+  new Pawn(new Position(0, 1), Color.white),
+  new Pawn(new Position(1, 1), Color.white),
+  new Pawn(new Position(2, 1), Color.white),
+  new Pawn(new Position(3, 1), Color.white),
+  new Pawn(new Position(4, 1), Color.white),
+  new Pawn(new Position(5, 1), Color.white),
+  new Pawn(new Position(6, 1), Color.white),
+  new Pawn(new Position(7, 1), Color.white),
+  new Piece(new Position(0, 0), PieceType.rook, Color.white),
+  new Piece(new Position(1, 0), PieceType.knight, Color.white),
+  new Piece(new Position(2, 0), PieceType.bishop, Color.white),
+  new Piece(new Position(3, 0), PieceType.queen, Color.white),
+  new Piece(new Position(4, 0), PieceType.king, Color.white),
+  new Piece(new Position(5, 0), PieceType.bishop, Color.white),
+  new Piece(new Position(6, 0), PieceType.knight, Color.white),
+  new Piece(new Position(7, 0), PieceType.rook, Color.white),
 ];

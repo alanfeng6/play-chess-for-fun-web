@@ -4,24 +4,22 @@ import "./Board.css";
 import {
   VERTICAL_AXIS,
   HORIZONTAL_AXIS,
-  Piece,
-  PieceType,
-  Color,
-  initialBoardState,
-  Position,
   GRID_SIZE,
-  samePosition,
 } from "../../Constants";
-import Movement from "../../Movement/Movement";
 
-const Board = () => {
+import { Piece, Position } from "../../models";
+
+interface Props {
+  playMove: (piece: Piece, position: Position) => boolean;
+  pieces: Piece[];
+}
+
+const Board = ({ playMove, pieces }: Props) => {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
-  const [promotedPawn, setPromotedPawn] = useState<Piece>();
-  const [prevPosition, setPrevPosition] = useState<Position>({ x: -1, y: -1 });
-  const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
+  const [prevPosition, setPrevPosition] = useState<Position>(
+    new Position(-1, -1)
+  );
   const boardRef = useRef<HTMLDivElement>(null);
-  const selectRef = useRef<HTMLDivElement>(null);
-  const movement = new Movement();
 
   function grabPiece(e: React.MouseEvent) {
     const element = e.target as HTMLElement;
@@ -31,10 +29,7 @@ const Board = () => {
       const prevY = Math.abs(
         Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
       );
-      setPrevPosition({
-        x: prevX,
-        y: prevY,
-      });
+      setPrevPosition(new Position(prevX, prevY));
       const x = e.clientX - GRID_SIZE / 2;
       const y = e.clientY - GRID_SIZE / 2;
       element.style.position = "absolute";
@@ -81,70 +76,12 @@ const Board = () => {
       );
 
       const currentPiece = pieces.find((p) =>
-        samePosition(p.position, prevPosition)
+        p.samePosition(prevPosition)
       );
 
       if (currentPiece) {
-        const legalMove = movement.isLegalMove(
-          prevPosition,
-          { x, y },
-          currentPiece.type,
-          currentPiece.color,
-          pieces
-        );
-        const isEnPassant = movement.isEnPassant(
-          prevPosition,
-          { x, y },
-          currentPiece.type,
-          currentPiece.color,
-          pieces
-        );
-        const pawnDirection = currentPiece.color === Color.white ? 1 : -1;
-        if (isEnPassant) {
-          const updatedPieces = pieces.reduce((results, piece) => {
-            if (samePosition(piece.position, prevPosition)) {
-              piece.enPassant = false;
-              piece.position.x = x;
-              piece.position.y = y;
-              results.push(piece);
-            } else if (
-              !samePosition(piece.position, { x, y: y - pawnDirection })
-            ) {
-              if (piece.type === PieceType.pawn) {
-                piece.enPassant = false;
-              }
-              results.push(piece);
-            }
-            return results;
-          }, [] as Piece[]);
-          setPieces(updatedPieces);
-        } else if (legalMove) {
-          // set piece position
-          const updatedPieces = pieces.reduce((results, piece) => {
-            if (samePosition(piece.position, prevPosition)) {
-              // check if piece is en passantable
-              piece.enPassant =
-                Math.abs(prevPosition.y - y) === 2 &&
-                piece.type === PieceType.pawn;
-              piece.position.x = x;
-              piece.position.y = y;
-              // check for promotion
-              let promRow = piece.color === Color.white ? 7 : 0;
-              if (y === promRow && piece.type === PieceType.pawn) {
-                selectRef.current?.classList.remove("hidden");
-                setPromotedPawn(piece);
-              }
-              results.push(piece);
-            } else if (!samePosition(piece.position, { x, y })) {
-              if (piece.type === PieceType.pawn) {
-                piece.enPassant = false;
-              }
-              results.push(piece);
-            }
-            return results;
-          }, [] as Piece[]);
-          setPieces(updatedPieces);
-        } else {
+        var success = playMove(currentPiece, new Position(x, y));
+        if (!success) {
           // reset piece position
           activePiece.style.position = "relative";
           activePiece.style.removeProperty("top");
@@ -155,75 +92,35 @@ const Board = () => {
     }
   }
 
-  function promote(type: PieceType) {
-    if (promotedPawn === undefined) {
-      return;
-    }
-    const updatedPieces = pieces.reduce((results, piece) => {
-      if (samePosition(piece.position, promotedPawn.position)) {
-        piece.type = type;
-        const color = piece.color === Color.white ? "white" : "black";
-        let pieceType = "";
-        switch (type) {
-          case PieceType.queen:
-            pieceType = "queen";
-            break;
-          case PieceType.rook:
-            pieceType = "rook";
-            break;
-          case PieceType.bishop:
-            pieceType = "bishop";
-            break;
-          case PieceType.knight:
-            pieceType = "knight";
-            break;
-        }
-        piece.image = `./${color}_${pieceType}.png`;
-      }
-      results.push(piece);
-      return results;
-    }, [] as Piece[]);
-    setPieces(updatedPieces);
-    selectRef.current?.classList.add("hidden");
-  }
-
-  function promColor() {
-    return (promotedPawn?.color === Color.white) ? "white" : "black";
-  }
-
   let board = [];
   for (let i = VERTICAL_AXIS.length - 1; i >= 0; i--) {
     for (let j = 0; j < HORIZONTAL_AXIS.length; j++) {
       const num = i + j;
       const piece = pieces.find((p) =>
-        samePosition(p.position, { x: j, y: i })
+        p.samePosition(new Position(j, i))
       );
       let image = piece ? piece.image : undefined;
-      board.push(<Square key={`${j},${i}`} num={num} image={image} />);
+      let currentPiece =
+        activePiece !== null
+          ? pieces.find((p) => p.samePosition(prevPosition))
+          : undefined;
+      let highlight = currentPiece?.legalMoves
+        ? currentPiece.legalMoves.some((p) =>
+            p.samePosition(new Position(j, i))
+          )
+        : false;
+      board.push(
+        <Square
+          key={`${j},${i}`}
+          num={num}
+          image={image}
+          highlight={highlight}
+        />
+      );
     }
   }
   return (
     <>
-      <div id="pawn-prom-select" className="hidden" ref={selectRef}>
-        <div className="select-body">
-          <img
-            onClick={() => promote(PieceType.queen)}
-            src={`${promColor()}_queen.png`}
-          ></img>
-          <img
-            onClick={() => promote(PieceType.rook)}
-            src={`${promColor()}_rook.png`}
-          ></img>
-          <img
-            onClick={() => promote(PieceType.bishop)}
-            src={`${promColor()}_bishop.png`}
-          ></img>
-          <img
-            onClick={() => promote(PieceType.knight)}
-            src={`${promColor()}_knight.png`}
-          ></img>
-        </div>
-      </div>
       <div
         onMouseMove={(e) => movePiece(e)}
         onMouseDown={(e) => grabPiece(e)}
