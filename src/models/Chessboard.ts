@@ -28,67 +28,72 @@ export class Chessboard {
     for (const piece of this.pieces) {
       piece.legalMoves = this.getLegalMoves(piece, this.pieces);
     }
-    this.getKingMoves();
+    this.checkCurrentColorMoves();
     // remove legal moves for color when it is not their turn
-    for (const piece of this.pieces.filter(p => p.color !== this.currentColor)) {
-        piece.legalMoves = [];
+    for (const piece of this.pieces.filter(
+      (p) => p.color !== this.currentColor
+    )) {
+      piece.legalMoves = [];
     }
   }
 
-  getKingMoves() {
-    const king = this.pieces.find((p) => p.isKing && p.color === this.currentColor);
-    if (king?.legalMoves === undefined) {
-      return;
-    }
-    // simulate king moves
-    for (const move of king.legalMoves) {
-      const simulatedBoard = this.clone();
-      const pieceAtDestination = simulatedBoard.pieces.find((p) =>
-        p.samePosition(move)
-      );
-      // if there is a piece at destination remove it
-      if (pieceAtDestination) {
-        simulatedBoard.pieces = simulatedBoard.pieces.filter(
-          (p) => !p.samePosition(move)
-        );
+  checkCurrentColorMoves() {
+    // loop through current color's piece
+    for (const piece of this.pieces.filter(
+      (p) => p.color === this.currentColor
+    )) {
+      if (piece.legalMoves === undefined) {
+        continue;
       }
-      const simulatedKing = simulatedBoard.pieces.find(
-        (p) => p.isKing && p.color === simulatedBoard.currentColor
-      );
-      simulatedKing!.position = move;
-      for (const opponent of simulatedBoard.pieces.filter(
-        (p) => p.color !== simulatedBoard.currentColor
-      )) {
-        opponent.legalMoves = simulatedBoard.getLegalMoves(
-          opponent,
-          simulatedBoard.pieces
-        );
-      }
-      let safe = true;
-      // determine if move is safe
-      for (const piece of simulatedBoard.pieces) {
-        if (piece.color === simulatedBoard.currentColor) continue;
-        if (piece.isPawn) {
-          const legalPawnMoves = simulatedBoard.getLegalMoves(
-            piece,
+      // simulate all moves
+      for (const move of piece.legalMoves) {
+        const simulatedBoard = this.clone();
+        // remove piece at destination
+        simulatedBoard.pieces = simulatedBoard.pieces =
+          simulatedBoard.pieces.filter((p) => !p.samePosition(move));
+        // get piece on cloned board
+        const clonedPiece = simulatedBoard.pieces.find((p) =>
+          p.samePiecePosition(piece)
+        )!;
+        clonedPiece.position = move.clone();
+        // get king of cloned board
+        const clonedKing = simulatedBoard.pieces.find(
+          (p) => p.isKing && p.color === simulatedBoard.currentColor
+        )!;
+
+        // loop through opponent pieces, update their legal moves
+        // and check if current color's king will be in danger
+        for (const opponent of simulatedBoard.pieces.filter(
+          (p) => p.color !== simulatedBoard.currentColor
+        )) {
+          opponent.legalMoves = simulatedBoard.getLegalMoves(
+            opponent,
             simulatedBoard.pieces
           );
-          if (
-            legalPawnMoves?.some(
-              (p) => p.x !== piece.position.x && p.samePosition(move)
-            )
-          ) {
-            safe = false;
-            break;
+          if (opponent.isPawn) {
+            if (
+              opponent.legalMoves.some(
+                (m) =>
+                  m.x !== opponent.position.x &&
+                  m.samePosition(clonedKing.position)
+              )
+            ) {
+              piece.legalMoves = piece.legalMoves?.filter(
+                (m) => !m.samePosition(move)
+              );
+            }
+          } else {
+            if (
+              opponent.legalMoves.some((m) =>
+                m.samePosition(clonedKing.position)
+              )
+            ) {
+              piece.legalMoves = piece.legalMoves?.filter(
+                (m) => !m.samePosition(move)
+              );
+            }
           }
-        } else if (piece.legalMoves?.some((p) => p.samePosition(move))) {
-          safe = false;
-          break;
         }
-      }
-      // remove move from legal moves
-      if (!safe) {
-        king.legalMoves = king.legalMoves?.filter((m) => !m.samePosition(move));
       }
     }
   }
@@ -172,6 +177,9 @@ export class Chessboard {
   }
 
   clone(): Chessboard {
-    return new Chessboard(this.pieces.map((p) => p.clone()), this.totalTurns);
+    return new Chessboard(
+      this.pieces.map((p) => p.clone()),
+      this.totalTurns
+    );
   }
 }

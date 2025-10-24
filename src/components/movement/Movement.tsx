@@ -1,20 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { initialBoard } from "../../Constants";
 import Board from "../Board/Board";
-import {
-  bishopMove,
-  getLegalBishopMoves,
-  getLegalKingMoves,
-  getLegalKnightMoves,
-  getLegalPawnMoves,
-  getLegalQueenMoves,
-  getLegalRookMoves,
-  kingMove,
-  knightMove,
-  pawnMove,
-  queenMove,
-  rookMove,
-} from "../../Movement/rules";
 import { Piece, Position } from "../../models";
 import { Color, PieceType } from "../../Types";
 import { Pawn } from "../../models/Pawn";
@@ -53,7 +39,7 @@ const Movement = () => {
       playedPiece.type,
       playedPiece.color
     );
-    setChessboard((prevBoard) => {
+    setChessboard(() => {
       const clonedBoard = chessboard.clone();
       clonedBoard.totalTurns++;
       playedMoveIsLegal = clonedBoard.playMove(
@@ -69,7 +55,7 @@ const Movement = () => {
     let promRow = playedPiece.color === Color.white ? 7 : 0;
     if (destination.y === promRow && playedPiece.isPawn) {
       selectRef.current?.classList.remove("hidden");
-      setPromotedPawn((prevPromPawn) => {
+      setPromotedPawn(() => {
         const clonedPlayedPiece = playedPiece.clone();
         clonedPlayedPiece.position = destination.clone();
         return clonedPlayedPiece;
@@ -106,50 +92,50 @@ const Movement = () => {
     return false;
   }
 
-  function isLegalMove(
-    prevPosition: Position,
-    position: Position,
-    type: PieceType,
-    color: Color
-  ): boolean {
-    let legalMove = false;
-    switch (type) {
-      case PieceType.pawn:
-        legalMove = pawnMove(prevPosition, position, color, chessboard.pieces);
-        break;
-      case PieceType.knight:
-        legalMove = knightMove(
-          prevPosition,
-          position,
-          color,
-          chessboard.pieces
-        );
-        break;
-      case PieceType.bishop:
-        legalMove = bishopMove(
-          prevPosition,
-          position,
-          color,
-          chessboard.pieces
-        );
-        break;
-      case PieceType.rook:
-        legalMove = rookMove(prevPosition, position, color, chessboard.pieces);
-        break;
-      case PieceType.queen:
-        legalMove = queenMove(prevPosition, position, color, chessboard.pieces);
-        break;
-      case PieceType.king:
-        legalMove = kingMove(prevPosition, position, color, chessboard.pieces);
-    }
-    return legalMove;
-  }
+  // function isLegalMove(
+  //   prevPosition: Position,
+  //   position: Position,
+  //   type: PieceType,
+  //   color: Color
+  // ): boolean {
+  //   let legalMove = false;
+  //   switch (type) {
+  //     case PieceType.pawn:
+  //       legalMove = pawnMove(prevPosition, position, color, chessboard.pieces);
+  //       break;
+  //     case PieceType.knight:
+  //       legalMove = knightMove(
+  //         prevPosition,
+  //         position,
+  //         color,
+  //         chessboard.pieces
+  //       );
+  //       break;
+  //     case PieceType.bishop:
+  //       legalMove = bishopMove(
+  //         prevPosition,
+  //         position,
+  //         color,
+  //         chessboard.pieces
+  //       );
+  //       break;
+  //     case PieceType.rook:
+  //       legalMove = rookMove(prevPosition, position, color, chessboard.pieces);
+  //       break;
+  //     case PieceType.queen:
+  //       legalMove = queenMove(prevPosition, position, color, chessboard.pieces);
+  //       break;
+  //     case PieceType.king:
+  //       legalMove = kingMove(prevPosition, position, color, chessboard.pieces);
+  //   }
+  //   return legalMove;
+  // }
 
   function promote(type: PieceType) {
     if (promotedPawn === undefined) {
       return;
     }
-    setChessboard((prevBoard) => {
+    setChessboard(() => {
       const clonedBoard = chessboard.clone();
       clonedBoard.pieces = clonedBoard.pieces.reduce((results, piece) => {
         if (piece.samePiecePosition(promotedPawn)) {
@@ -171,7 +157,7 @@ const Movement = () => {
 
   return (
     <>
-    <p style={{color: "white", fontSize: "24px"}}>{chessboard.totalTurns}</p>
+    {/* <p style={{color: "white", fontSize: "24px"}}>{chessboard.totalTurns}</p> */}
       <div id="pawn-prom-select" className="hidden" ref={selectRef}>
         <div className="select-body">
           <img
