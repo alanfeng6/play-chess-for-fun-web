@@ -11,6 +11,7 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100px;
+    z-index: 1;
 }
 
 .square .piece:hover {
@@ -44,7 +45,9 @@
 .highlighted-square.piece-square::before {
     position: absolute;
     content: " ";
-    width: 100px;
-    height: 100px;
-    border: 10px solid red;
+    width: 90px;
+    height: 90px;
+    z-index: 0;
+    background-color: red;
+    margin: 5px;
 }

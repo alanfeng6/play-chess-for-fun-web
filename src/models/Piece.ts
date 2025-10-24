@@ -11,43 +11,48 @@ export class Piece {
     position: Position,
     type: PieceType,
     color: Color,
-    legalMoves?: Position[]
+    legalMoves: Position[] = []
   ) {
     this.image = `./${color}_${type}.png`;
     this.position = position;
     this.type = type;
     this.color = color;
+    this.legalMoves = legalMoves;
   }
 
-  get isPawn() : boolean {
+  get isPawn(): boolean {
     return this.type === PieceType.pawn;
   }
 
-  get isKnight() : boolean {
+  get isKnight(): boolean {
     return this.type === PieceType.knight;
   }
 
-  get isBishop() : boolean {
+  get isBishop(): boolean {
     return this.type === PieceType.bishop;
   }
 
-  get isRook() : boolean {
+  get isRook(): boolean {
     return this.type === PieceType.rook;
   }
 
-  get isQueen() : boolean {
+  get isQueen(): boolean {
     return this.type === PieceType.queen;
   }
 
-  get isKing() : boolean {
+  get isKing(): boolean {
     return this.type === PieceType.king;
   }
 
-  samePiecePosition(otherPiece: Piece) : boolean {
+  samePiecePosition(otherPiece: Piece): boolean {
     return this.position.samePosition(otherPiece.position);
   }
 
-  samePosition(otherPosition: Position) : boolean {
+  samePosition(otherPosition: Position): boolean {
     return this.position.samePosition(otherPosition);
+  }
+
+  clone(): Piece {
+    return new Piece(this.position.clone(), this.type, this.color, this.legalMoves?.map(m => m.clone()));
   }
 }

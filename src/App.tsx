@@ -1,4 +1,3 @@
-import Board from "./components/Board/Board";
 import Navbar from "./components/Navbar";
 import './App.css'
 import Movement from "./components/movement/Movement";

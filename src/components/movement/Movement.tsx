@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { initialBoardState } from "../../Constants";
+import { initialBoard } from "../../Constants";
 import Board from "../Board/Board";
 import {
   bishopMove,
@@ -18,98 +18,64 @@ import {
 import { Piece, Position } from "../../models";
 import { Color, PieceType } from "../../Types";
 import { Pawn } from "../../models/Pawn";
+import { Chessboard } from "../../models/Chessboard";
 
 const Movement = () => {
-  const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
+  const [chessboard, setChessboard] = useState<Chessboard>(initialBoard);
   const [promotedPawn, setPromotedPawn] = useState<Piece>();
   const selectRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    updateLegalMoves();
+    chessboard.calculateMoves();
   }, []);
-  function updateLegalMoves() {
-    setPieces((currentPieces) => {
-      return currentPieces.map((p) => {
-        p.legalMoves = getLegalMoves(p, currentPieces);
-        return p;
-      });
-    });
-  }
 
   function playMove(playedPiece: Piece, destination: Position): boolean {
-    const legalMove = isLegalMove(
-      playedPiece.position,
-      destination,
-      playedPiece.type,
-      playedPiece.color
-    );
+    // if playing piece doesn't have any moves
+    if (playedPiece.legalMoves === undefined) {
+      return false;
+    }
+    // if black's turn and white is trying to move
+    if (playedPiece.color === Color.white && chessboard.totalTurns % 2 !== 1) {
+      return false;
+    }
+    // if white's turn and black is trying to move
+    if (playedPiece.color === Color.black && chessboard.totalTurns % 2 !== 0) {
+      return false;
+    }
+    let playedMoveIsLegal = false;
+    const legalMove = playedPiece.legalMoves?.some(m => m.samePosition(destination));
+    if (!legalMove) {
+      return false;
+    }
     const enPassant = isEnPassant(
       playedPiece.position,
       destination,
       playedPiece.type,
       playedPiece.color
     );
-    const pawnDirection = playedPiece.color === Color.white ? 1 : -1;
-    if (enPassant) {
-      const updatedPieces = pieces.reduce((results, piece) => {
-        if (piece.samePiecePosition(playedPiece)) {
-          if (piece.isPawn) {
-            (piece as Pawn).enPassant = false;
-          }
+    setChessboard((prevBoard) => {
+      const clonedBoard = chessboard.clone();
+      clonedBoard.totalTurns++;
+      playedMoveIsLegal = clonedBoard.playMove(
+        enPassant,
+        legalMove,
+        playedPiece,
+        destination
+      );
+      return clonedBoard;
+    });
 
-          piece.position.x = destination.x;
-          piece.position.y = destination.y;
-          results.push(piece);
-        } else if (
-          !piece.samePosition(
-            new Position(destination.x, destination.y - pawnDirection)
-          )
-        ) {
-          if (piece.isPawn) {
-            (piece as Pawn).enPassant = false;
-          }
-          results.push(piece);
-        }
-        return results;
-      }, [] as Piece[]);
-      updateLegalMoves();
-      setPieces(updatedPieces);
-    } else if (legalMove) {
-      // set piece position
-      const updatedPieces = pieces.reduce((results, piece) => {
-        if (piece.samePiecePosition(playedPiece)) {
-          // check if piece is en passantable
-          if (piece.isPawn) {
-            (piece as Pawn).enPassant =
-              Math.abs(playedPiece.position.y - destination.y) === 2 &&
-              piece.type === PieceType.pawn;
-          }
-
-          piece.position.x = destination.x;
-          piece.position.y = destination.y;
-          // check for promotion
-          let promRow = piece.color === Color.white ? 7 : 0;
-          if (destination.y === promRow && piece.type === PieceType.pawn) {
-            selectRef.current?.classList.remove("hidden");
-            setPromotedPawn(piece);
-          }
-          results.push(piece);
-        } else if (
-          !piece.samePosition(new Position(destination.x, destination.y))
-        ) {
-          if (piece.isPawn) {
-            (piece as Pawn).enPassant = false;
-          }
-          results.push(piece);
-        }
-        return results;
-      }, [] as Piece[]);
-      updateLegalMoves();
-      setPieces(updatedPieces);
-    } else {
-      return false;
+    // check for promotion
+    let promRow = playedPiece.color === Color.white ? 7 : 0;
+    if (destination.y === promRow && playedPiece.isPawn) {
+      selectRef.current?.classList.remove("hidden");
+      setPromotedPawn((prevPromPawn) => {
+        const clonedPlayedPiece = playedPiece.clone();
+        clonedPlayedPiece.position = destination.clone();
+        return clonedPlayedPiece;
+      });
     }
-    return true;
+    return playedMoveIsLegal;
   }
 
   function isEnPassant(
@@ -125,7 +91,7 @@ const Movement = () => {
           position.x - prevPosition.x === 1) &&
         position.y - prevPosition.y === pawnDirection
       ) {
-        const piece = pieces.find(
+        const piece = chessboard.pieces.find(
           (p) =>
             p.position.x === position.x &&
             p.position.y === position.y - pawnDirection &&
@@ -149,75 +115,53 @@ const Movement = () => {
     let legalMove = false;
     switch (type) {
       case PieceType.pawn:
-        legalMove = pawnMove(prevPosition, position, color, pieces);
+        legalMove = pawnMove(prevPosition, position, color, chessboard.pieces);
         break;
       case PieceType.knight:
-        legalMove = knightMove(prevPosition, position, color, pieces);
+        legalMove = knightMove(
+          prevPosition,
+          position,
+          color,
+          chessboard.pieces
+        );
         break;
       case PieceType.bishop:
-        legalMove = bishopMove(prevPosition, position, color, pieces);
+        legalMove = bishopMove(
+          prevPosition,
+          position,
+          color,
+          chessboard.pieces
+        );
         break;
       case PieceType.rook:
-        legalMove = rookMove(prevPosition, position, color, pieces);
+        legalMove = rookMove(prevPosition, position, color, chessboard.pieces);
         break;
       case PieceType.queen:
-        legalMove = queenMove(prevPosition, position, color, pieces);
+        legalMove = queenMove(prevPosition, position, color, chessboard.pieces);
         break;
       case PieceType.king:
-        legalMove = kingMove(prevPosition, position, color, pieces);
+        legalMove = kingMove(prevPosition, position, color, chessboard.pieces);
     }
     return legalMove;
-  }
-
-  function getLegalMoves(piece: Piece, boardState: Piece[]): Position[] {
-    switch (piece.type) {
-      case PieceType.pawn:
-        return getLegalPawnMoves(piece, boardState);
-      case PieceType.knight:
-        return getLegalKnightMoves(piece, boardState);
-      case PieceType.bishop:
-        return getLegalBishopMoves(piece, boardState);
-      case PieceType.rook:
-        return getLegalRookMoves(piece, boardState);
-      case PieceType.queen:
-        return getLegalQueenMoves(piece, boardState);
-      case PieceType.king:
-        return getLegalKingMoves(piece, boardState);
-      default:
-        return [];
-    }
   }
 
   function promote(type: PieceType) {
     if (promotedPawn === undefined) {
       return;
     }
-    const updatedPieces = pieces.reduce((results, piece) => {
-      if (piece.samePiecePosition(promotedPawn)) {
-        piece.type = type;
-        const color = piece.color === Color.white ? "white" : "black";
-        let pieceType = "";
-        switch (type) {
-          case PieceType.queen:
-            pieceType = "queen";
-            break;
-          case PieceType.rook:
-            pieceType = "rook";
-            break;
-          case PieceType.bishop:
-            pieceType = "bishop";
-            break;
-          case PieceType.knight:
-            pieceType = "knight";
-            break;
+    setChessboard((prevBoard) => {
+      const clonedBoard = chessboard.clone();
+      clonedBoard.pieces = clonedBoard.pieces.reduce((results, piece) => {
+        if (piece.samePiecePosition(promotedPawn)) {
+          results.push(new Piece(piece.position.clone(), type, piece.color));
+        } else {
+          results.push(piece);
         }
-        piece.image = `./${color}_${pieceType}.png`;
-      }
-      results.push(piece);
-      return results;
-    }, [] as Piece[]);
-    updateLegalMoves();
-    setPieces(updatedPieces);
+        return results;
+      }, [] as Piece[]);
+      clonedBoard.calculateMoves();
+      return clonedBoard;
+    });
     selectRef.current?.classList.add("hidden");
   }
 
@@ -227,6 +171,7 @@ const Movement = () => {
 
   return (
     <>
+    <p style={{color: "white", fontSize: "24px"}}>{chessboard.totalTurns}</p>
       <div id="pawn-prom-select" className="hidden" ref={selectRef}>
         <div className="select-body">
           <img
@@ -247,7 +192,7 @@ const Movement = () => {
           ></img>
         </div>
       </div>
-      <Board playMove={playMove} pieces={pieces} />
+      <Board playMove={playMove} pieces={chessboard.pieces} />
     </>
   );
 };

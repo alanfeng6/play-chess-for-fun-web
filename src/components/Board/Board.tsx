@@ -80,7 +80,7 @@ const Board = ({ playMove, pieces }: Props) => {
       );
 
       if (currentPiece) {
-        var success = playMove(currentPiece, new Position(x, y));
+        var success = playMove(currentPiece.clone(), new Position(x, y));
         if (!success) {
           // reset piece position
           activePiece.style.position = "relative";

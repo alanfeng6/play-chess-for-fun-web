@@ -1,3 +1,4 @@
+import { Chessboard } from "./models/Chessboard";
 import { Pawn } from "./models/Pawn";
 import { Piece } from "./models/Piece";
 import { Position } from "./models/Position";
@@ -8,7 +9,7 @@ export const HORIZONTAL_AXIS = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export const GRID_SIZE = 100;
 
-export const initialBoardState: Piece[] = [
+export const initialBoard: Chessboard = new Chessboard([
   new Piece(new Position(0, 7), PieceType.rook, Color.black),
   new Piece(new Position(1, 7), PieceType.knight, Color.black),
   new Piece(new Position(2, 7), PieceType.bishop, Color.black),
@@ -41,4 +42,4 @@ export const initialBoardState: Piece[] = [
   new Piece(new Position(5, 0), PieceType.bishop, Color.white),
   new Piece(new Position(6, 0), PieceType.knight, Color.white),
   new Piece(new Position(7, 0), PieceType.rook, Color.white),
-];
+], 1);

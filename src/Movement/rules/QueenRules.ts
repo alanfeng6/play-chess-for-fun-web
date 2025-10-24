@@ -87,7 +87,7 @@ export const getLegalQueenMoves = (
   // up right
   for (let i = 1; i < 8; i++) {
     const destination = new Position(
-      queen.position.x + 1,
+      queen.position.x + i,
       queen.position.y + i,
     );
     if (!isOccupied(destination, boardState)) {
