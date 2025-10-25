@@ -7,10 +7,11 @@ export class Pawn extends Piece {
   constructor(
     position: Position,
     color: Color,
+    hasMoved: boolean,
     enPassant?: boolean,
     legalMoves: Position[] = []
   ) {
-    super(position, PieceType.pawn, color, legalMoves);
+    super(position, PieceType.pawn, color, hasMoved, legalMoves);
     this.enPassant = enPassant;
   }
 
@@ -18,6 +19,7 @@ export class Pawn extends Piece {
     return new Pawn(
       this.position.clone(),
       this.color,
+      this.hasMoved,
       this.enPassant,
       this.legalMoves?.map((m) => m.clone())
     );

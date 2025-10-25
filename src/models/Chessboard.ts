@@ -1,4 +1,5 @@
 import {
+  getCastlingMoves,
   getLegalBishopMoves,
   getLegalKingMoves,
   getLegalKnightMoves,
@@ -28,6 +29,17 @@ export class Chessboard {
     for (const piece of this.pieces) {
       piece.legalMoves = this.getLegalMoves(piece, this.pieces);
     }
+    // calculate castling
+    for (const king of this.pieces.filter((p) => p.isKing)) {
+      if (king.legalMoves === undefined) {
+        continue;
+      }
+      king.legalMoves = [
+        ...king.legalMoves,
+        ...getCastlingMoves(king, this.pieces),
+      ];
+    }
+
     this.checkCurrentColorMoves();
     // remove legal moves for color when it is not their turn
     for (const piece of this.pieces.filter(
@@ -124,15 +136,34 @@ export class Chessboard {
     destination: Position
   ): boolean {
     const pawnDirection = playedPiece.color === Color.white ? 1 : -1;
+    // if move is castling move
+    const distance = Math.abs(destination.x - playedPiece.position.x);
+    if (playedPiece.isKing && distance === 2) {
+      const direction = destination.x - playedPiece.position.x > 0 ? 1 : -1;
+      this.pieces = this.pieces.map((p) => {
+        if (p.samePiecePosition(playedPiece)) {
+          p.position.x = destination.x;
+        }
+        else if (p.isRook && p.color === playedPiece.color && !p.hasMoved) {
+          const rookDistance = Math.abs(p.position.x - destination.x);
+          if (rookDistance <= 2) {
+            p.position.x = destination.x - direction;
+          }
+        }
+        return p;
+      });
+      this.calculateMoves();
+      return true;
+    }
     if (enPassant) {
       this.pieces = this.pieces.reduce((results, piece) => {
         if (piece.samePiecePosition(playedPiece)) {
           if (piece.isPawn) {
             (piece as Pawn).enPassant = false;
           }
-
           piece.position.x = destination.x;
           piece.position.y = destination.y;
+          piece.hasMoved = true;
           results.push(piece);
         } else if (
           !piece.samePosition(
@@ -159,6 +190,7 @@ export class Chessboard {
 
           piece.position.x = destination.x;
           piece.position.y = destination.y;
+          piece.hasMoved = true;
 
           results.push(piece);
         } else if (!piece.samePosition(destination)) {

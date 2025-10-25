@@ -139,7 +139,7 @@ const Movement = () => {
       const clonedBoard = chessboard.clone();
       clonedBoard.pieces = clonedBoard.pieces.reduce((results, piece) => {
         if (piece.samePiecePosition(promotedPawn)) {
-          results.push(new Piece(piece.position.clone(), type, piece.color));
+          results.push(new Piece(piece.position.clone(), type, piece.color, true));
         } else {
           results.push(piece);
         }

@@ -6,17 +6,20 @@ export class Piece {
   position: Position;
   type: PieceType;
   color: Color;
+  hasMoved: boolean;
   legalMoves?: Position[];
   constructor(
     position: Position,
     type: PieceType,
     color: Color,
+    hasMoved: boolean,
     legalMoves: Position[] = []
   ) {
     this.image = `./${color}_${type}.png`;
     this.position = position;
     this.type = type;
     this.color = color;
+    this.hasMoved = hasMoved;
     this.legalMoves = legalMoves;
   }
 
@@ -53,6 +56,12 @@ export class Piece {
   }
 
   clone(): Piece {
-    return new Piece(this.position.clone(), this.type, this.color, this.legalMoves?.map(m => m.clone()));
+    return new Piece(
+      this.position.clone(),
+      this.type,
+      this.color,
+      this.hasMoved,
+      this.legalMoves?.map((m) => m.clone())
+    );
   }
 }

@@ -57,6 +57,10 @@ export const getLegalRookMoves = (
   const legalMoves: Position[] = [];
   // up
   for (let i = 1; i < 8; i++) {
+    // stop checking if outside of board
+    if (rook.position.y + i > 7) {
+      break;
+    }
     const destination = new Position(
       rook.position.x,
       rook.position.y + i,
@@ -72,6 +76,10 @@ export const getLegalRookMoves = (
   }
   // right
   for (let i = 1; i < 8; i++) {
+    // stop checking if outside of board
+    if (rook.position.x + i > 7) {
+      break;
+    }
     const destination = new Position(
       rook.position.x + i,
       rook.position.y,
@@ -87,6 +95,10 @@ export const getLegalRookMoves = (
   }
   // down
   for (let i = 1; i < 8; i++) {
+    // stop checking if outside of board
+    if (rook.position.y - i < 0) {
+      break;
+    }
     const destination = new Position(
       rook.position.x,
       rook.position.y - i,
@@ -102,6 +114,10 @@ export const getLegalRookMoves = (
   }
   // left
   for (let i = 1; i < 8; i++) {
+    // stop checking if outside of board
+    if (rook.position.x - i < 0) {
+      break;
+    }
     const destination = new Position(
       rook.position.x - i,
       rook.position.y,

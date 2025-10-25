@@ -24,6 +24,7 @@ const Board = ({ playMove, pieces }: Props) => {
   function grabPiece(e: React.MouseEvent) {
     const element = e.target as HTMLElement;
     const board = boardRef.current;
+    e.preventDefault();
     if (element.classList.contains("piece") && board) {
       const prevX = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
       const prevY = Math.abs(
