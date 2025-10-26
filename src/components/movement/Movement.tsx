@@ -46,7 +46,11 @@ const Movement = () => {
         playedPiece,
         destination
       );
-      if (clonedBoard.stalemate) {
+      if (clonedBoard.draw) {
+        setMessage("Draw by insufficient material");
+        resultsRef.current?.classList.remove("hidden");
+      }
+      else if (clonedBoard.stalemate) {
         setMessage("Draw by stalemate");
         resultsRef.current?.classList.remove("hidden");
       }

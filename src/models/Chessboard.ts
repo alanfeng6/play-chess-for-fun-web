@@ -16,12 +16,19 @@ export class Chessboard {
   pieces: Piece[];
   totalTurns: number;
   stalemate: boolean;
+  draw: boolean;
   winningColor?: Color;
 
-  constructor(pieces: Piece[], totalTurns: number, stalemate: boolean) {
+  constructor(
+    pieces: Piece[],
+    totalTurns: number,
+    stalemate: boolean,
+    draw: boolean
+  ) {
     this.pieces = pieces;
     this.totalTurns = totalTurns;
     this.stalemate = stalemate;
+    this.draw = draw;
   }
 
   get currentColor(): Color {
@@ -200,7 +207,6 @@ export class Chessboard {
         }
         return results;
       }, [] as Piece[]);
-      this.calculateMoves();
     } else if (legalMove) {
       // set piece position
       this.pieces = this.pieces.reduce((results, piece) => {
@@ -224,18 +230,56 @@ export class Chessboard {
         }
         return results;
       }, [] as Piece[]);
-      this.calculateMoves();
     } else {
       return false;
     }
+    this.calculateMoves();
+    this.checkMaterial();
     return true;
+  }
+
+  checkMaterial(): void {
+    // check white and black have king or king + bishop/knight
+    const whiteEligibleForDraw =
+      this.pieces.filter((p) => p.color === Color.white).length === 1 ||
+      (this.pieces.filter((p) => p.color === Color.white).length === 2 &&
+        this.pieces.filter(
+          (p) => p.color === Color.white && (p.isKnight || p.isBishop)
+        ).length === 1);
+    const blackEligibleForDraw =
+      this.pieces.filter((p) => p.color === Color.black).length === 1 ||
+      (this.pieces.filter((p) => p.color === Color.black).length === 2 &&
+        this.pieces.filter(
+          (p) => p.color === Color.black && (p.isKnight || p.isBishop)
+        ).length === 1);
+    if (whiteEligibleForDraw && blackEligibleForDraw) {
+      this.draw = true;
+    }
+    // check 2 knights and king vs king
+    else if (
+      this.pieces.filter((p) => p.color === Color.white).length === 3 &&
+      this.pieces.filter((p) => p.color === Color.white && p.isKnight)
+        .length === 2 &&
+      this.pieces.filter((p) => p.color === Color.black).length === 1
+    ) {
+      this.draw = true;
+    }
+    else if (
+      this.pieces.filter((p) => p.color === Color.black).length === 3 &&
+      this.pieces.filter((p) => p.color === Color.black && p.isKnight)
+        .length === 2 &&
+      this.pieces.filter((p) => p.color === Color.white).length === 1
+    ) {
+      this.draw = true;
+    }
   }
 
   clone(): Chessboard {
     return new Chessboard(
       this.pieces.map((p) => p.clone()),
       this.totalTurns,
-      this.stalemate
+      this.stalemate,
+      this.draw
     );
   }
 }
