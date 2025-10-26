@@ -42,4 +42,6 @@ export const initialBoard: Chessboard = new Chessboard([
   new Piece(new Position(5, 0), PieceType.bishop, Color.white, false),
   new Piece(new Position(6, 0), PieceType.knight, Color.white, false),
   new Piece(new Position(7, 0), PieceType.rook, Color.white, false),
-], 1);
+], 1, false);
+
+initialBoard.calculateMoves();

@@ -39,66 +39,138 @@ export const getLegalKingMoves = (
   const legalMoves: Position[] = [];
   // up
   let destination = new Position(king.position.x, king.position.y + 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // right
   destination = new Position(king.position.x + 1, king.position.y);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // down
   destination = new Position(king.position.x, king.position.y - 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // left
   destination = new Position(king.position.x - 1, king.position.y);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // up right
   destination = new Position(king.position.x + 1, king.position.y + 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // down right
   destination = new Position(king.position.x + 1, king.position.y - 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // down left
   destination = new Position(king.position.x - 1, king.position.y - 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   // up left
   destination = new Position(king.position.x - 1, king.position.y + 1);
-  if (!isOccupied(destination, boardState)) {
-    legalMoves.push(destination);
-  } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
-    legalMoves.push(destination);
+  if (
+    !(
+      destination.x < 0 ||
+      destination.x > 7 ||
+      destination.y < 0 ||
+      destination.y > 7
+    )
+  ) {
+    if (!isOccupied(destination, boardState)) {
+      legalMoves.push(destination);
+    } else if (isOccupiedByOpponent(destination, boardState, king.color)) {
+      legalMoves.push(destination);
+    }
   }
 
   return legalMoves;
@@ -120,23 +192,25 @@ export const getCastlingMoves = (
   // loop through rooks
   for (const rook of rooks) {
     // determine if we need to go to right or left side
-    const direction = (king.position.x - rook.position.x > 0) ? 1 : -1;
+    const direction = king.position.x - rook.position.x > 0 ? 1 : -1;
     const adjacent = king.position.clone();
     adjacent.x -= direction;
-    if (!rook.legalMoves?.some(m => m.samePosition(adjacent))) {
+    if (!rook.legalMoves?.some((m) => m.samePosition(adjacent))) {
       continue;
     }
-    const concerningSquares = rook.legalMoves.filter(m => m.y === king.position.y);
+    const concerningSquares = rook.legalMoves.filter(
+      (m) => m.y === king.position.y
+    );
     // check if any of opponent pieces can capture
     // squares in between king and rook
-    const opponentPieces = boardState.filter(p => p.color !== king.color);
+    const opponentPieces = boardState.filter((p) => p.color !== king.color);
     let legal = true;
     for (const opponent of opponentPieces) {
       if (opponent.legalMoves === undefined) {
         continue;
       }
       for (const move of opponent.legalMoves) {
-        if (concerningSquares.some(s => s.samePosition(move))) {
+        if (concerningSquares.some((s) => s.samePosition(move))) {
           legal = false;
         }
         if (!legal) {
@@ -151,7 +225,9 @@ export const getCastlingMoves = (
       continue;
     }
     // we now want to add it as legal move
-    legalMoves.push(new Position(king.position.x - 2 * direction, king.position.y));
+    legalMoves.push(
+      new Position(king.position.x - 2 * direction, king.position.y)
+    );
   }
 
   return legalMoves;

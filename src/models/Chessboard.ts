@@ -15,10 +15,13 @@ import { Position } from "./Position";
 export class Chessboard {
   pieces: Piece[];
   totalTurns: number;
+  stalemate: boolean;
+  winningColor?: Color;
 
-  constructor(pieces: Piece[], totalTurns: number) {
+  constructor(pieces: Piece[], totalTurns: number, stalemate: boolean) {
     this.pieces = pieces;
     this.totalTurns = totalTurns;
+    this.stalemate = stalemate;
   }
 
   get currentColor(): Color {
@@ -41,11 +44,32 @@ export class Chessboard {
     }
 
     this.checkCurrentColorMoves();
+    const opponentMoves = this.pieces
+      .filter((p) => p.color !== this.currentColor)
+      .map((p) => p.legalMoves)
+      .flat();
     // remove legal moves for color when it is not their turn
     for (const piece of this.pieces.filter(
       (p) => p.color !== this.currentColor
     )) {
       piece.legalMoves = [];
+    }
+    // check if game has ended
+    if (
+      this.pieces
+        .filter((p) => p.color === this.currentColor)
+        .some((p) => p.legalMoves !== undefined && p.legalMoves.length > 0)
+    ) {
+      return;
+    }
+    const kingPos = this.pieces.find(
+      (p) => p.isKing && p.color === this.currentColor
+    )!.position;
+    if (opponentMoves.some((m) => m?.samePosition(kingPos))) {
+      this.winningColor =
+        this.currentColor === Color.white ? Color.black : Color.white;
+    } else {
+      this.stalemate = true;
     }
   }
 
@@ -143,8 +167,7 @@ export class Chessboard {
       this.pieces = this.pieces.map((p) => {
         if (p.samePiecePosition(playedPiece)) {
           p.position.x = destination.x;
-        }
-        else if (p.isRook && p.color === playedPiece.color && !p.hasMoved) {
+        } else if (p.isRook && p.color === playedPiece.color && !p.hasMoved) {
           const rookDistance = Math.abs(p.position.x - destination.x);
           if (rookDistance <= 2) {
             p.position.x = destination.x - direction;
@@ -211,7 +234,8 @@ export class Chessboard {
   clone(): Chessboard {
     return new Chessboard(
       this.pieces.map((p) => p.clone()),
-      this.totalTurns
+      this.totalTurns,
+      this.stalemate
     );
   }
 }

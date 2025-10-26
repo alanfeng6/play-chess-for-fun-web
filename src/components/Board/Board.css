@@ -7,7 +7,7 @@
     height: 800px;
 }
 
-#pawn-prom-select {
+.box {
     position: absolute;
     top: 0px;
     right: 0px;
@@ -15,11 +15,11 @@
     left: 0px;
 }
 
-#pawn-prom-select.hidden {
+.box.hidden {
     display: none;
 }
 
-#pawn-prom-select > .select-body {
+.box > .body {
     position: absolute;
     top: calc(50% - 150px);
     left: calc(50% - 400px);
@@ -32,12 +32,32 @@
     z-index: 5;
 }
 
-#pawn-prom-select .select-body > img {
+.box .body > img {
     height: 150px;
     width: 150px;
 }
 
-#pawn-prom-select .select-body > img:hover {
+.box .body > img:hover {
     cursor: pointer;
     background-color: chocolate;
+}
+
+.box > .body > .checkmate-body {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
+}
+
+.box > .body > .checkmate-body > span {
+    font-size: 32px;
+}
+
+.box > .body > .checkmate-body > button {
+    background-color: rgb(13, 110, 253);
+    color: white;
+    padding: 24px 48px;
+    font-size: 32px;
+    border: none;
+    border-radius: 50px;
 }

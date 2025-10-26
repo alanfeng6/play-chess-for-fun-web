@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { initialBoard } from "../../Constants";
 import Board from "../Board/Board";
 import { Piece, Position } from "../../models";
@@ -7,13 +7,11 @@ import { Pawn } from "../../models/Pawn";
 import { Chessboard } from "../../models/Chessboard";
 
 const Movement = () => {
-  const [chessboard, setChessboard] = useState<Chessboard>(initialBoard);
+  const [chessboard, setChessboard] = useState<Chessboard>(initialBoard.clone());
   const [promotedPawn, setPromotedPawn] = useState<Piece>();
+  const [message, setMessage] = useState("");
   const selectRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    chessboard.calculateMoves();
-  }, []);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   function playMove(playedPiece: Piece, destination: Position): boolean {
     // if playing piece doesn't have any moves
@@ -48,6 +46,14 @@ const Movement = () => {
         playedPiece,
         destination
       );
+      if (clonedBoard.stalemate) {
+        setMessage("Draw by stalemate");
+        resultsRef.current?.classList.remove("hidden");
+      }
+      else if (clonedBoard.winningColor) {
+        setMessage(`${clonedBoard.winningColor === Color.white ? "White" : "Black"} wins!`)
+        resultsRef.current?.classList.remove("hidden");
+      }
       return clonedBoard;
     });
 
@@ -155,11 +161,15 @@ const Movement = () => {
     return promotedPawn?.color === Color.white ? "white" : "black";
   }
 
+  function restart() {
+    resultsRef.current?.classList.add("hidden");
+    setChessboard(initialBoard.clone());
+  }
+
   return (
     <>
-    {/* <p style={{color: "white", fontSize: "24px"}}>{chessboard.totalTurns}</p> */}
-      <div id="pawn-prom-select" className="hidden" ref={selectRef}>
-        <div className="select-body">
+      <div className="box hidden" ref={selectRef}>
+        <div className="body">
           <img
             onClick={() => promote(PieceType.queen)}
             src={`${promColor()}_queen.png`}
@@ -176,6 +186,14 @@ const Movement = () => {
             onClick={() => promote(PieceType.knight)}
             src={`${promColor()}_knight.png`}
           ></img>
+        </div>
+      </div>
+      <div className="box hidden" ref={resultsRef}>
+        <div className="body">
+          <div className="checkmate-body">
+            <span>{message}</span>
+            <button onClick={restart}>Play Again</button>
+          </div>
         </div>
       </div>
       <Board playMove={playMove} pieces={chessboard.pieces} />
