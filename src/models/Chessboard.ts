@@ -11,24 +11,34 @@ import { Color, PieceType } from "../Types";
 import { Pawn } from "./Pawn";
 import { Piece } from "./Piece";
 import { Position } from "./Position";
+import { SimplifiedPiece } from "./SimplifiedPiece";
 
 export class Chessboard {
   pieces: Piece[];
   totalTurns: number;
   stalemate: boolean;
-  draw: boolean;
+  insufficientMaterial: boolean;
+  repetition: boolean;
+  boardHistory: { [key: string]: number };
+  moveRule: number;
   winningColor?: Color;
 
   constructor(
     pieces: Piece[],
     totalTurns: number,
     stalemate: boolean,
-    draw: boolean
+    insufficientMaterial: boolean,
+    repetition: boolean,
+    boardHistory: { [key: string]: number },
+    moveRule: number
   ) {
     this.pieces = pieces;
     this.totalTurns = totalTurns;
     this.stalemate = stalemate;
-    this.draw = draw;
+    this.insufficientMaterial = insufficientMaterial;
+    this.repetition = repetition;
+    this.boardHistory = boardHistory;
+    this.moveRule = moveRule;
   }
 
   get currentColor(): Color {
@@ -61,6 +71,8 @@ export class Chessboard {
     )) {
       piece.legalMoves = [];
     }
+    this.checkMaterial();
+    this.checkRepetition();
     // check if game has ended
     if (
       this.pieces
@@ -69,15 +81,7 @@ export class Chessboard {
     ) {
       return;
     }
-    const kingPos = this.pieces.find(
-      (p) => p.isKing && p.color === this.currentColor
-    )!.position;
-    if (opponentMoves.some((m) => m?.samePosition(kingPos))) {
-      this.winningColor =
-        this.currentColor === Color.white ? Color.black : Color.white;
-    } else {
-      this.stalemate = true;
-    }
+    this.checkStalemate(opponentMoves);
   }
 
   checkCurrentColorMoves() {
@@ -167,6 +171,7 @@ export class Chessboard {
     destination: Position
   ): boolean {
     const pawnDirection = playedPiece.color === Color.white ? 1 : -1;
+    const numPiecesBefore = this.pieces.length;
     // if move is castling move
     const distance = Math.abs(destination.x - playedPiece.position.x);
     if (playedPiece.isKing && distance === 2) {
@@ -233,8 +238,11 @@ export class Chessboard {
     } else {
       return false;
     }
+    this.moveRule++;
+    if (playedPiece.isPawn || this.pieces.length < numPiecesBefore) {
+      this.moveRule = 0;
+    }
     this.calculateMoves();
-    this.checkMaterial();
     return true;
   }
 
@@ -253,7 +261,7 @@ export class Chessboard {
           (p) => p.color === Color.black && (p.isKnight || p.isBishop)
         ).length === 1);
     if (whiteEligibleForDraw && blackEligibleForDraw) {
-      this.draw = true;
+      this.insufficientMaterial = true;
     }
     // check 2 knights and king vs king
     else if (
@@ -262,15 +270,39 @@ export class Chessboard {
         .length === 2 &&
       this.pieces.filter((p) => p.color === Color.black).length === 1
     ) {
-      this.draw = true;
-    }
-    else if (
+      this.insufficientMaterial = true;
+    } else if (
       this.pieces.filter((p) => p.color === Color.black).length === 3 &&
       this.pieces.filter((p) => p.color === Color.black && p.isKnight)
         .length === 2 &&
       this.pieces.filter((p) => p.color === Color.white).length === 1
     ) {
-      this.draw = true;
+      this.insufficientMaterial = true;
+    }
+  }
+
+  checkRepetition(): void {
+    const simplifiedPieces = this.pieces.map((p) => new SimplifiedPiece(p));
+    const stringSimplifiedPieces = JSON.stringify(simplifiedPieces);
+    if (this.boardHistory[stringSimplifiedPieces] === undefined) {
+      this.boardHistory[stringSimplifiedPieces] = 1;
+    } else {
+      this.boardHistory[stringSimplifiedPieces]++;
+    }
+    if (this.boardHistory[stringSimplifiedPieces] === 3) {
+      this.repetition = true;
+    }
+  }
+
+  checkStalemate(opponentMoves: (Position | undefined)[]): void {
+    const kingPos = this.pieces.find(
+      (p) => p.isKing && p.color === this.currentColor
+    )!.position;
+    if (opponentMoves.some((m) => m?.samePosition(kingPos))) {
+      this.winningColor =
+        this.currentColor === Color.white ? Color.black : Color.white;
+    } else {
+      this.stalemate = true;
     }
   }
 
@@ -279,7 +311,10 @@ export class Chessboard {
       this.pieces.map((p) => p.clone()),
       this.totalTurns,
       this.stalemate,
-      this.draw
+      this.insufficientMaterial,
+      this.repetition,
+      this.boardHistory,
+      this.moveRule
     );
   }
 }

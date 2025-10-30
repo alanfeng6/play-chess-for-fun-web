@@ -7,7 +7,9 @@ import { Pawn } from "../../models/Pawn";
 import { Chessboard } from "../../models/Chessboard";
 
 const Movement = () => {
-  const [chessboard, setChessboard] = useState<Chessboard>(initialBoard.clone());
+  const [chessboard, setChessboard] = useState<Chessboard>(
+    initialBoard.clone()
+  );
   const [promotedPawn, setPromotedPawn] = useState<Piece>();
   const [message, setMessage] = useState("");
   const selectRef = useRef<HTMLDivElement>(null);
@@ -27,7 +29,9 @@ const Movement = () => {
       return false;
     }
     let playedMoveIsLegal = false;
-    const legalMove = playedPiece.legalMoves?.some(m => m.samePosition(destination));
+    const legalMove = playedPiece.legalMoves?.some((m) =>
+      m.samePosition(destination)
+    );
     if (!legalMove) {
       return false;
     }
@@ -46,18 +50,7 @@ const Movement = () => {
         playedPiece,
         destination
       );
-      if (clonedBoard.draw) {
-        setMessage("Draw by insufficient material");
-        resultsRef.current?.classList.remove("hidden");
-      }
-      else if (clonedBoard.stalemate) {
-        setMessage("Draw by stalemate");
-        resultsRef.current?.classList.remove("hidden");
-      }
-      else if (clonedBoard.winningColor) {
-        setMessage(`${clonedBoard.winningColor === Color.white ? "White" : "Black"} wins!`)
-        resultsRef.current?.classList.remove("hidden");
-      }
+      checkEnd(clonedBoard);
       return clonedBoard;
     });
 
@@ -149,13 +142,16 @@ const Movement = () => {
       const clonedBoard = chessboard.clone();
       clonedBoard.pieces = clonedBoard.pieces.reduce((results, piece) => {
         if (piece.samePiecePosition(promotedPawn)) {
-          results.push(new Piece(piece.position.clone(), type, piece.color, true));
+          results.push(
+            new Piece(piece.position.clone(), type, piece.color, true)
+          );
         } else {
           results.push(piece);
         }
         return results;
       }, [] as Piece[]);
       clonedBoard.calculateMoves();
+      checkEnd(clonedBoard);
       return clonedBoard;
     });
     selectRef.current?.classList.add("hidden");
@@ -168,6 +164,28 @@ const Movement = () => {
   function restart() {
     resultsRef.current?.classList.add("hidden");
     setChessboard(initialBoard.clone());
+  }
+
+  function checkEnd(chessboard: Chessboard) {
+    if (chessboard.insufficientMaterial) {
+      setMessage("Draw by insufficient material");
+      resultsRef.current?.classList.remove("hidden");
+    } else if (chessboard.stalemate) {
+      setMessage("Draw by stalemate");
+      resultsRef.current?.classList.remove("hidden");
+    } else if (chessboard.repetition) {
+      setMessage("Draw by repetition");
+      resultsRef.current?.classList.remove("hidden");
+    } else if (chessboard.moveRule >= 100) {
+      setMessage("Draw by 50 move rule");
+      resultsRef.current?.classList.remove("hidden");
+    }
+    else if (chessboard.winningColor) {
+      setMessage(
+        `${chessboard.winningColor === Color.white ? "White" : "Black"} wins!`
+      );
+      resultsRef.current?.classList.remove("hidden");
+    }
   }
 
   return (
