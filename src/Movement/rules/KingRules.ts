@@ -199,7 +199,7 @@ export const getCastlingMoves = (
       continue;
     }
     const concerningSquares = rook.legalMoves.filter(
-      (m) => m.y === king.position.y
+      (m) => (m.y === king.position.y && m.x !== 1)
     );
     // check if any of opponent pieces can capture
     // squares in between king and rook
@@ -211,6 +211,10 @@ export const getCastlingMoves = (
       }
       for (const move of opponent.legalMoves) {
         if (concerningSquares.some((s) => s.samePosition(move))) {
+          legal = false;
+        }
+        // cant castle if in check
+        else if (move.samePosition(king.position)) {
           legal = false;
         }
         if (!legal) {

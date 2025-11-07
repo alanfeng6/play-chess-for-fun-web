@@ -95,13 +95,27 @@ export class Chessboard {
       // simulate all moves
       for (const move of piece.legalMoves) {
         const simulatedBoard = this.clone();
+        const oldSim = simulatedBoard.pieces.length;
+        let isPieceAtDestination = false;
         // remove piece at destination
-        simulatedBoard.pieces = simulatedBoard.pieces =
-          simulatedBoard.pieces.filter((p) => !p.samePosition(move));
+        simulatedBoard.pieces = simulatedBoard.pieces.filter(
+          (p) => !p.samePosition(move)
+        );
+        if (simulatedBoard.pieces.length !== oldSim) {
+          isPieceAtDestination = true;
+        }
         // get piece on cloned board
         const clonedPiece = simulatedBoard.pieces.find((p) =>
           p.samePiecePosition(piece)
         )!;
+        // if en passant remove it as well
+        const direction = clonedPiece.color === Color.white ? 1 : -1;
+        if (clonedPiece.isPawn && !isPieceAtDestination) {
+          simulatedBoard.pieces = simulatedBoard.pieces.filter(
+            (p) => !p.samePosition(new Position(move.x, move.y - direction))
+          );
+        }
+
         clonedPiece.position = move.clone();
         // get king of cloned board
         const clonedKing = simulatedBoard.pieces.find(
